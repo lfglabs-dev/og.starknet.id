@@ -1,6 +1,8 @@
 import "../styles/globals.css";
 import type { AppProps } from "next/app";
 import { InjectedConnector, StarknetProvider } from "@starknet-react/core";
+import { ThemeProvider } from "@mui/material";
+import theme from "../styles/theme";
 
 export default function App({ Component, pageProps }: AppProps) {
   const connectors = [
@@ -10,7 +12,9 @@ export default function App({ Component, pageProps }: AppProps) {
 
   return (
     <StarknetProvider connectors={connectors}>
-      <Component {...pageProps} />
+      <ThemeProvider theme={theme}>
+        <Component {...pageProps} />
+      </ThemeProvider>
     </StarknetProvider>
   );
 }

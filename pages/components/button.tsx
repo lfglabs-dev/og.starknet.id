@@ -4,11 +4,20 @@ import styles from "../../styles/button.module.css";
 type ButtonProps = {
   onClick: () => void;
   children: string | React.ReactNode;
+  disabled?: boolean;
 };
 
-const Button: FunctionComponent<ButtonProps> = ({ children, onClick }) => {
+const Button: FunctionComponent<ButtonProps> = ({
+  children,
+  onClick,
+  disabled = false,
+}) => {
   return (
-    <button onClick={onClick} className={styles["nq-button"]}>
+    <button
+      disabled={disabled}
+      onClick={onClick}
+      className={styles["nq-button"]}
+    >
       {children}
     </button>
   );
