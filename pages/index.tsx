@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import {
   Call,
   useAccount,
+  useConnectors,
   useStarknet,
   useStarknetExecute,
 } from "@starknet-react/core";
@@ -18,6 +19,8 @@ export default function Home() {
   const [hasWallet, setHasWallet] = useState<boolean>(true);
   const [tokenId, setTokenId] = useState<number>(0);
   const [subdomain, setSubdomain] = useState<string>();
+  const [errorMessage, setErrorMessage] = useState<string>();
+  const [signature, setSignature] = useState<string[]>([]);
   const encodedSubdomain: string = useEncoded(subdomain ?? "").toString(10);
   const isDomainValid = useIsValid(subdomain ?? "");
   const [callData, setCallData] = useState<Call[]>([]);
@@ -27,7 +30,8 @@ export default function Home() {
   const { execute: transfer_domain } = useStarknetExecute({
     calls: callData as any,
   });
-  const encodedRootDomain: string = useEncoded("og").toString(10);
+  const encodedRootDomain: string = useEncoded("fricoben").toString(10);
+  const { disconnect } = useConnectors();
 
   useEffect(() => {
     const STARKNET_NETWORK = {
@@ -43,6 +47,16 @@ export default function Home() {
   useEffect(() => {
     if (address) {
       setHasWallet(false);
+      fetch(`/api/${hexToDecimal(address)}`)
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.error) {
+            setErrorMessage(data.error);
+          } else {
+            setErrorMessage(undefined);
+            setSignature(data);
+          }
+        });
     } else {
       setHasWallet(true);
     }
@@ -58,18 +72,16 @@ export default function Home() {
     if (tokenId != 0) {
       setCallData([
         {
-          contractAddress: process.env.NEXT_PUBLIC_NAMING_CONTRACT as string,
-          entrypoint: "transfer_domain",
-          calldata: [2, encodedSubdomain, encodedRootDomain, tokenId],
-        },
-        {
-          contractAddress: process.env.NEXT_PUBLIC_NAMING_CONTRACT as string,
-          entrypoint: "set_domain_to_address",
+          contractAddress: process.env
+            .NEXT_PUBLIC_DISTRIBUTION_CONTRACT as string,
+          entrypoint: "register",
           calldata: [
             2,
             encodedSubdomain,
             encodedRootDomain,
-            hexToDecimal(address ?? ""),
+            tokenId,
+            signature?.[0],
+            signature?.[1],
           ],
         },
       ]);
@@ -82,23 +94,26 @@ export default function Home() {
           calldata: [newTokenId],
         },
         {
-          contractAddress: process.env.NEXT_PUBLIC_NAMING_CONTRACT as string,
-          entrypoint: "transfer_domain",
-          calldata: [2, encodedSubdomain, encodedRootDomain, newTokenId],
-        },
-        {
-          contractAddress: process.env.NEXT_PUBLIC_NAMING_CONTRACT as string,
-          entrypoint: "set_domain_to_address",
+          contractAddress: process.env
+            .NEXT_PUBLIC_DISTRIBUTION_CONTRACT as string,
+          entrypoint: "register",
           calldata: [
             2,
             encodedSubdomain,
             encodedRootDomain,
-            hexToDecimal(address ?? ""),
+            newTokenId,
+            signature?.[0],
+            signature?.[1],
           ],
         },
       ]);
     }
-  }, [tokenId, encodedSubdomain, address, encodedRootDomain]);
+  }, [tokenId, encodedSubdomain, address, encodedRootDomain, signature]);
+
+  function disconnectByClick(): void {
+    disconnect();
+    setHasWallet(true);
+  }
 
   return (
     <>
@@ -116,35 +131,50 @@ export default function Home() {
             alt="Some image"
           />
           <div className={styles.textSection}>
-            <h1 className={styles.title}>Claim your OG domain</h1>
-            <TextField
-              fullWidth
-              id="outlined-basic"
-              label={
-                isDomainValid != true
-                  ? `"${isDomainValid}" is not a valid character`
-                  : "Subdomain"
-              }
-              placeholder="Subdomain"
-              variant="outlined"
-              onChange={(e) => changeSubdomain(e.target.value)}
-              color="primary"
-              required
-              error={isDomainValid != true}
-            />
-            <SelectIdentity
-              tokenId={tokenId}
-              changeTokenId={(value) => setTokenId(value)}
-            />
-            <div className="mt-3">
-              <Button
-                onClick={() =>
-                  address ? transfer_domain() : setHasWallet(true)
-                }
-              >
-                {address ? "Mint your subdomain" : "Connect to mainnet"}
-              </Button>
-            </div>
+            {errorMessage ? (
+              <>
+                <h1 className={styles.title}>{errorMessage}</h1>
+                <div className="mt-3">
+                  <Button onClick={() => disconnectByClick()}>
+                    Try another account
+                  </Button>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="mb-5">
+                  <h1 className={styles.title}>Claim your OG domain</h1>
+                </div>
+                <TextField
+                  fullWidth
+                  id="outlined-basic"
+                  label={
+                    isDomainValid != true
+                      ? `"${isDomainValid}" is not a valid character`
+                      : "Subdomain"
+                  }
+                  placeholder="Subdomain"
+                  variant="outlined"
+                  onChange={(e) => changeSubdomain(e.target.value)}
+                  color="primary"
+                  required
+                  error={isDomainValid != true}
+                />
+                <SelectIdentity
+                  tokenId={tokenId}
+                  changeTokenId={(value) => setTokenId(value)}
+                />
+                <div className="mt-3">
+                  <Button
+                    onClick={() =>
+                      address ? transfer_domain() : setHasWallet(true)
+                    }
+                  >
+                    {address ? "Mint your subdomain" : "Connect to mainnet"}
+                  </Button>
+                </div>
+              </>
+            )}
           </div>
         </div>
         <Wallets
