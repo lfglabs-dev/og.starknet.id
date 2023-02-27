@@ -85,3 +85,17 @@ export function useEncoded(decoded: string): BN {
 
   return encoded;
 }
+
+export function simplifyAddress(address: string): string {
+  // Remove the first zeros
+  if (!isHexString(address)) {
+    throw new Error("Invalid hex string");
+  }
+  let simplified = address.slice(2);
+  while (simplified.startsWith("0")) {
+    simplified = simplified.slice(1);
+  }
+  // Add the 0x back
+  simplified = "0x" + simplified;
+  return simplified.toLowerCase();
+}

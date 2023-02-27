@@ -13,7 +13,12 @@ import {
 import Wallets from "./components/wallets";
 import SelectIdentity from "./components/selectIdentity";
 import { TextField } from "@mui/material";
-import { hexToDecimal, useEncoded, useIsValid } from "../utils/utils";
+import {
+  hexToDecimal,
+  simplifyAddress,
+  useEncoded,
+  useIsValid,
+} from "../utils/utils";
 
 export default function Home() {
   const [hasWallet, setHasWallet] = useState<boolean>(true);
@@ -21,6 +26,7 @@ export default function Home() {
   const [subdomain, setSubdomain] = useState<string>();
   const [errorMessage, setErrorMessage] = useState<string>();
   const [signature, setSignature] = useState<string[]>([]);
+  const [signedAddress, setSignedAddress] = useState<string>();
   const encodedSubdomain: string = useEncoded(subdomain ?? "").toString(10);
   const isDomainValid = useIsValid(subdomain ?? "");
   const [callData, setCallData] = useState<Call[]>([]);
@@ -34,6 +40,14 @@ export default function Home() {
   const { disconnect } = useConnectors();
 
   useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const signatureParam = params.get("signature") || "";
+    const addressParam = params.get("wallet") || "";
+    setSignature(signatureParam.split(","));
+    setSignedAddress(addressParam);
+  }, []);
+
+  useEffect(() => {
     const STARKNET_NETWORK = {
       mainnet: "0x534e5f4d41494e",
       testnet: "0x534e5f474f45524c49",
@@ -45,22 +59,12 @@ export default function Home() {
   }, [library]);
 
   useEffect(() => {
-    if (address) {
-      setHasWallet(false);
-      fetch(`/api/${hexToDecimal(address)}`)
-        .then((response) => response.json())
-        .then((data) => {
-          if (data.error) {
-            setErrorMessage(data.error);
-          } else {
-            setErrorMessage(undefined);
-            setSignature(data);
-          }
-        });
-    } else {
-      setHasWallet(true);
+    if (address && signedAddress) {
+      if (simplifyAddress(address) === simplifyAddress(signedAddress)) {
+        setErrorMessage(undefined);
+      } else setErrorMessage("Wrong wallet");
     }
-  }, [address]);
+  }, [address, signedAddress]);
 
   function changeSubdomain(value: string): void {
     setSubdomain(value);
@@ -131,7 +135,20 @@ export default function Home() {
             alt="Some image"
           />
           <div className={styles.textSection}>
-            {errorMessage ? (
+            {!signedAddress || !signature ? (
+              <>
+                <h1 className={styles.subtitle}>
+                  You need to use the /claim command on the StarknetID Discord
+                  server
+                </h1>
+                <br></br>
+                <Button
+                  onClick={() => window.open("https://discord.gg/GpsW542ndB")}
+                >
+                  Join
+                </Button>
+              </>
+            ) : errorMessage ? (
               <>
                 <h1 className={styles.title}>{errorMessage}</h1>
                 <div className="mt-3">
