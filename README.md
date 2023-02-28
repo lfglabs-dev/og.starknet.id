@@ -1,6 +1,8 @@
 ## Front-end Subdomain Distribution 🌴
 
-An example of subdomain distribution front end. This front end interacts with [this contract]("https://github.com/starknet-id/subdomain-distribution") that you can use as you want.
+An example of subdomain distribution front end. This front end interacts with [these contracts templates]("https://github.com/starknet-id/subdomain-distribution") that you can use as you want.
+
+In this app we use the [whitelist.cairo](https://github.com/starknet-id/subdomain_distribution/blob/main/src/whitelist.cairo) contract template.
 
 ### How to use this template ? 🌴
 
