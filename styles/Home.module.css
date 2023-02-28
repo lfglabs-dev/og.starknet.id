@@ -5,7 +5,7 @@
   align-items: center;
   padding: 4rem;
   height: 100vh;
-  background-color: var(--soft-brown);
+  background-color: var(--tertiary);
   overflow: hidden;
   max-width: 100vw;
 }
@@ -16,12 +16,13 @@
   align-items: center;
   justify-content: center;
   flex-direction: column;
+  width: 380px;
 }
 
 .title {
   font-family: "Montserrat-ExtraBold";
   font-size: 1.8rem;
-  color: var(--brown);
+  color: var(--secondary);
   text-transform: uppercase;
   text-align: center;
 }
@@ -30,7 +31,7 @@
   font-family: "Montserrat-ExtraBold";
   font-size: 1.4rem;
   max-width: 600px;
-  color: var(--brown);
+  color: var(--secondary);
   text-transform: uppercase;
   text-align: center;
 }
@@ -53,6 +54,10 @@
 
 /* Mobile */
 @media (max-width: 700px) {
+  .textSection {
+    width: auto;
+  }
+
   .title {
     font-size: 1.5rem;
   }
@@ -68,20 +73,22 @@
 
   .identityTokenImage {
     width: 100%;
-    height: auto;
     border-radius: 20px;
   }
 
   .card {
     border-radius: 20px;
-    width: 85%;
-    height: auto;
+    width: 75%;
+    font-size: medium;
+    height: fit-content;
     flex-direction: column;
   }
 
+  .subtitle {
+    font-size: 1.2rem;
+  }
+
   .main {
-    height: auto;
-    padding-top: 1rem;
-    padding-bottom: 1rem;
+    padding: 1rem 0 1rem 0;
   }
 }

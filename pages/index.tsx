@@ -1,5 +1,5 @@
-/* eslint-disable @next/next/no-img-element */
 import Head from "next/head";
+import React from "react";
 import styles from "../styles/Home.module.css";
 import Button from "./components/button";
 import { useEffect, useState } from "react";
@@ -15,8 +15,11 @@ import SelectIdentity from "./components/selectIdentity";
 import { TextField } from "@mui/material";
 import { simplifyAddress, useEncoded, useIsValid } from "../utils/utils";
 import { useRouter } from "next/router";
+import ModalMessage from "./components/modalMessage";
 
 export default function Home() {
+  const network =
+    process.env.NEXT_PUBLIC_IS_TESTNET === "true" ? "testnet" : "mainnet";
   const [hasWallet, setHasWallet] = useState<boolean>(true);
   const [tokenId, setTokenId] = useState<number>(0);
   const [subdomain, setSubdomain] = useState<string>();
@@ -24,26 +27,39 @@ export default function Home() {
   const encodedSubdomain: string = useEncoded(subdomain ?? "").toString(10);
   const isDomainValid = useIsValid(subdomain ?? "");
   const [callData, setCallData] = useState<Call[]>([]);
-  const [isNotMainnet, setIsNotMainnet] = useState<boolean>(false);
+  const [isWrongNetwork, setIsWrongNetwork] = useState<boolean>(false);
   const { library } = useStarknet();
   const { address } = useAccount();
   const { execute: transfer_domain } = useStarknetExecute({
     calls: callData as any,
   });
   const router = useRouter();
-  const encodedRootDomain: string = useEncoded("fricoben").toString(10);
+  const encodedRootDomain: string = useEncoded(
+    process.env.NEXT_PUBLIC_ROOT_DOMAIN ?? ""
+  ).toString(10);
   const { disconnect } = useConnectors();
 
   useEffect(() => {
+    if (hasWallet) return;
+
     const STARKNET_NETWORK = {
       mainnet: "0x534e5f4d41494e",
       testnet: "0x534e5f474f45524c49",
     };
 
-    if (library.chainId != STARKNET_NETWORK.mainnet) {
-      setIsNotMainnet(true);
+    if (library.chainId === STARKNET_NETWORK.testnet && network === "mainnet") {
+      console.log("wallet testnet et app mainnet");
+      setIsWrongNetwork(true);
+    } else if (
+      library.chainId === STARKNET_NETWORK.mainnet &&
+      network === "testnet"
+    ) {
+      console.log("wallet mainnet et app testnet");
+      setIsWrongNetwork(true);
+    } else {
+      setIsWrongNetwork(false);
     }
-  }, [library]);
+  }, [library, network, hasWallet]);
 
   useEffect(() => {
     if (address && router.query.wallet) {
@@ -62,6 +78,7 @@ export default function Home() {
 
   useEffect(() => {
     const newTokenId: number = Math.floor(Math.random() * 1000000000000);
+    const signatures = (router.query.signature as string)?.split(",");
 
     if (tokenId != 0) {
       setCallData([
@@ -74,8 +91,8 @@ export default function Home() {
             encodedSubdomain,
             encodedRootDomain,
             tokenId,
-            router.query.signature?.[0],
-            router.query.signature?.[1],
+            signatures?.[0],
+            signatures?.[1],
           ],
         },
       ]);
@@ -96,8 +113,8 @@ export default function Home() {
             encodedSubdomain,
             encodedRootDomain,
             newTokenId,
-            router.query.signature?.[0],
-            router.query.signature?.[1],
+            signatures?.[0],
+            signatures?.[1],
           ],
         },
       ]);
@@ -122,7 +139,7 @@ export default function Home() {
           <img
             className={styles.identityTokenImage}
             src="/jungle.jpg"
-            alt="Some image"
+            alt="A Jungle image for a VIP domain"
           />
           <div className={styles.textSection}>
             {!router.query.wallet || !router.query.signature ? (
@@ -173,6 +190,12 @@ export default function Home() {
                 />
                 <div className="mt-3">
                   <Button
+                    disabled={
+                      address
+                        ? Boolean(!subdomain) ||
+                          typeof isDomainValid === "string"
+                        : false
+                    }
                     onClick={() =>
                       address ? transfer_domain() : setHasWallet(true)
                     }
@@ -187,6 +210,24 @@ export default function Home() {
         <Wallets
           closeWallet={() => setHasWallet(false)}
           hasWallet={hasWallet}
+        />
+        <ModalMessage
+          open={isWrongNetwork && Boolean(address)}
+          title={"Wrong network"}
+          closeModal={() => setIsWrongNetwork(false)}
+          message={
+            <div className="mt-3 flex flex-col items-center justify-center text-center">
+              <p className="text-brown-600">
+                This app only supports Starknet {network}, you have to change
+                your network to be able use it.
+              </p>
+              <div className="mt-3">
+                <Button onClick={() => disconnectByClick()}>
+                  {`Disconnect`}
+                </Button>
+              </div>
+            </div>
+          }
         />
       </main>
     </>
