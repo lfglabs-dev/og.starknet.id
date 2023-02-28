@@ -10,7 +10,7 @@ _First step:_ Clone this repo `git clone https://github.com/starknet-id/og.stark
 
 _Second step:_ Install the dependencies using `npm i`
 
-_Third step:_ Create an environnement file named `.env.local`. Here is the one we use for https://goerli.og.starknet.id. Be sure to change every variable depending on your needs. (The `NEXT_PUBLIC_ROOT_DOMAIN`represents the domain that you'll distribute on your app).
+_Third step:_ Create an environnement file named `.env.local`. Here is the one we use for https://goerli.og.starknet.id. Be sure to change variables depending on your needs. (The `NEXT_PUBLIC_ROOT_DOMAIN` represents the root domain that you'll distribute subdomain of on your app).
 
 ```
 NEXT_PUBLIC_APP_LINK=https://goerli.app.starknet.id
