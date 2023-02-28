@@ -1,4 +1,3 @@
-/* eslint-disable @next/next/no-img-element */
 import {
   FormControl,
   FormHelperText,
@@ -68,7 +67,7 @@ const SelectIdentity: FunctionComponent<SelectIdentityProps> = ({
             <ListItemIcon>
               <img
                 width={"25px"}
-                src="/StarknetIdLogo.svg"
+                src="/starknetIdLogo.svg"
                 alt="starknet.id avatar"
               />
             </ListItemIcon>

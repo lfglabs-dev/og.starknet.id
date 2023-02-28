@@ -16,6 +16,7 @@
   align-items: center;
   justify-content: center;
   flex-direction: column;
+  width: 380px;
 }
 
 .title {
@@ -53,6 +54,10 @@
 
 /* Mobile */
 @media (max-width: 700px) {
+  .textSection {
+    width: auto;
+  }
+
   .title {
     font-size: 1.5rem;
   }
@@ -68,20 +73,22 @@
 
   .identityTokenImage {
     width: 100%;
-    height: auto;
     border-radius: 20px;
   }
 
   .card {
     border-radius: 20px;
-    width: 85%;
-    height: auto;
+    width: 75%;
+    font-size: medium;
+    height: fit-content;
     flex-direction: column;
   }
 
+  .subtitle {
+    font-size: 1.2rem;
+  }
+
   .main {
-    height: auto;
-    padding-top: 1rem;
-    padding-bottom: 1rem;
+    padding: 1rem 0 1rem 0;
   }
 }
