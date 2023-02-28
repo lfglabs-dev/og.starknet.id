@@ -26,6 +26,15 @@
   text-align: center;
 }
 
+.subtitle {
+  font-family: "Montserrat-ExtraBold";
+  font-size: 1.4rem;
+  max-width: 600px;
+  color: var(--brown);
+  text-transform: uppercase;
+  text-align: center;
+}
+
 .card {
   box-shadow: 0px 0px 30px -20px #000000;
   background-color: white;

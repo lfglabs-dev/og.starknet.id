@@ -13,14 +13,14 @@ import {
 import Wallets from "./components/wallets";
 import SelectIdentity from "./components/selectIdentity";
 import { TextField } from "@mui/material";
-import { hexToDecimal, useEncoded, useIsValid } from "../utils/utils";
+import { simplifyAddress, useEncoded, useIsValid } from "../utils/utils";
+import { useRouter } from "next/router";
 
 export default function Home() {
   const [hasWallet, setHasWallet] = useState<boolean>(true);
   const [tokenId, setTokenId] = useState<number>(0);
   const [subdomain, setSubdomain] = useState<string>();
   const [errorMessage, setErrorMessage] = useState<string>();
-  const [signature, setSignature] = useState<string[]>([]);
   const encodedSubdomain: string = useEncoded(subdomain ?? "").toString(10);
   const isDomainValid = useIsValid(subdomain ?? "");
   const [callData, setCallData] = useState<Call[]>([]);
@@ -30,6 +30,7 @@ export default function Home() {
   const { execute: transfer_domain } = useStarknetExecute({
     calls: callData as any,
   });
+  const router = useRouter();
   const encodedRootDomain: string = useEncoded("fricoben").toString(10);
   const { disconnect } = useConnectors();
 
@@ -45,22 +46,15 @@ export default function Home() {
   }, [library]);
 
   useEffect(() => {
-    if (address) {
-      setHasWallet(false);
-      fetch(`/api/${hexToDecimal(address)}`)
-        .then((response) => response.json())
-        .then((data) => {
-          if (data.error) {
-            setErrorMessage(data.error);
-          } else {
-            setErrorMessage(undefined);
-            setSignature(data);
-          }
-        });
-    } else {
-      setHasWallet(true);
+    if (address && router.query.wallet) {
+      if (
+        simplifyAddress(address) ===
+        simplifyAddress(router.query.wallet as string)
+      ) {
+        setErrorMessage(undefined);
+      } else setErrorMessage("Wrong wallet");
     }
-  }, [address]);
+  }, [address, router.query.wallet]);
 
   function changeSubdomain(value: string): void {
     setSubdomain(value);
@@ -80,8 +74,8 @@ export default function Home() {
             encodedSubdomain,
             encodedRootDomain,
             tokenId,
-            signature?.[0],
-            signature?.[1],
+            router.query.signature?.[0],
+            router.query.signature?.[1],
           ],
         },
       ]);
@@ -102,13 +96,13 @@ export default function Home() {
             encodedSubdomain,
             encodedRootDomain,
             newTokenId,
-            signature?.[0],
-            signature?.[1],
+            router.query.signature?.[0],
+            router.query.signature?.[1],
           ],
         },
       ]);
     }
-  }, [tokenId, encodedSubdomain, address, encodedRootDomain, signature]);
+  }, [tokenId, encodedSubdomain, address, encodedRootDomain, router.query]);
 
   function disconnectByClick(): void {
     disconnect();
@@ -131,7 +125,20 @@ export default function Home() {
             alt="Some image"
           />
           <div className={styles.textSection}>
-            {errorMessage ? (
+            {!router.query.wallet || !router.query.signature ? (
+              <>
+                <h1 className={styles.subtitle}>
+                  You need to use the /claim command on the StarknetID Discord
+                  server
+                </h1>
+                <br></br>
+                <Button
+                  onClick={() => window.open("https://discord.gg/GpsW542ndB")}
+                >
+                  Join
+                </Button>
+              </>
+            ) : errorMessage ? (
               <>
                 <h1 className={styles.title}>{errorMessage}</h1>
                 <div className="mt-3">
