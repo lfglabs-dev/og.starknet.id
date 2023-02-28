@@ -3,6 +3,7 @@ import type { AppProps } from "next/app";
 import { InjectedConnector, StarknetProvider } from "@starknet-react/core";
 import { ThemeProvider } from "@mui/material";
 import theme from "../styles/theme";
+import React from "react";
 
 export default function App({ Component, pageProps }: AppProps) {
   const connectors = [
