@@ -1,6 +1,6 @@
 .menu {
   position: absolute;
-  background-color: var(--beige);
+  background-color: var(--background);
   align-self: center;
   left: 50%;
   top: 50%;
@@ -14,7 +14,7 @@
 }
 
 .menu p {
-  color: var(--brown);
+  color: var(--secondary);
 }
 
 .blackFilter {
@@ -42,7 +42,7 @@
 }
 
 .menu_title {
-  color: var(--brown);
+  color: var(--secondary);
   font-family: "Readex Pro", Verdana, sans-serif;
   font-size: 21px;
   font-weight: bold;

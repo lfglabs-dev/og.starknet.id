@@ -7,7 +7,7 @@
   position: relative;
   height: 3rem;
   line-height: 2.5rem;
-  color: var(--beige);
+  color: var(--background);
   font-size: 1rem;
   font-weight: bold;
   text-transform: uppercase;
@@ -52,13 +52,13 @@
 
 /* green */
 .nq-button {
-  color: var(--beige-);
-  background: var(--green);
-  background-image: var(--green-bg);
+  color: var(--background-);
+  background: var(--primary);
+  background-image: var(--primary-bg);
 }
 
 .nq-button::before {
-  background-image: var(--brown);
+  background-image: var(--secondary);
 }
 
 /* Focus Ring for Tabs – can be optimized in the future with better :focus-visible support */
@@ -70,7 +70,7 @@
   top: -5px;
   right: -5px;
   bottom: -5px;
-  border: 2px solid var(--soft-brown); /* Based on Nimiq Light Blue */
+  border: 2px solid var(--tertiary); /* Based on Nimiq Light Blue */
   border-radius: 500px;
   opacity: 0;
 }

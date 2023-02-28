@@ -139,7 +139,7 @@ export default function Home() {
           <img
             className={styles.identityTokenImage}
             src="/jungle.jpg"
-            alt="Some image"
+            alt="A Jungle image for a VIP domain"
           />
           <div className={styles.textSection}>
             {!router.query.wallet || !router.query.signature ? (
