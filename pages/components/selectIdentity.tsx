@@ -47,50 +47,48 @@ const SelectIdentity: FunctionComponent<SelectIdentityProps> = ({
   }, [account]);
 
   return (
-    <div className="mt-3">
-      <FormControl fullWidth>
-        <InputLabel>Starknet.id</InputLabel>
-        <Select
-          value={tokenId}
-          defaultValue={ownedIdentities[0]}
-          label="Starknet.id"
-          onChange={(e) => changeTokenId(Number(e.target.value))}
-          sx={{
-            "& .MuiSelect-select": {
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-            },
-          }}
-        >
-          <MenuItem value={0}>
+    <FormControl fullWidth>
+      <InputLabel>Starknet.id</InputLabel>
+      <Select
+        value={tokenId}
+        defaultValue={ownedIdentities[0]}
+        label="Starknet.id"
+        onChange={(e) => changeTokenId(Number(e.target.value))}
+        sx={{
+          "& .MuiSelect-select": {
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          },
+        }}
+      >
+        <MenuItem value={0}>
+          <ListItemIcon>
+            <img
+              width={"25px"}
+              src="/starknetIdLogo.svg"
+              alt="starknet.id avatar"
+            />
+          </ListItemIcon>
+          <ListItemText primary={defaultText} />
+        </MenuItem>
+        {ownedIdentities.map((tokenId: number, index: number) => (
+          <MenuItem key={index} value={tokenId}>
             <ListItemIcon>
               <img
                 width={"25px"}
-                src="/starknetIdLogo.svg"
+                src={`https://www.starknet.id/api/identicons/${tokenId}`}
                 alt="starknet.id avatar"
               />
             </ListItemIcon>
-            <ListItemText primary={defaultText} />
+            <ListItemText primary={tokenId} />
           </MenuItem>
-          {ownedIdentities.map((tokenId: number, index: number) => (
-            <MenuItem key={index} value={tokenId}>
-              <ListItemIcon>
-                <img
-                  width={"25px"}
-                  src={`https://www.starknet.id/api/identicons/${tokenId}`}
-                  alt="starknet.id avatar"
-                />
-              </ListItemIcon>
-              <ListItemText primary={tokenId} />
-            </MenuItem>
-          ))}
-        </Select>
-        <FormHelperText>
-          Choose the starknet identity you want to link with your domain
-        </FormHelperText>
-      </FormControl>
-    </div>
+        ))}
+      </Select>
+      <FormHelperText>
+        Choose the starknet ID you want to link with your domain
+      </FormHelperText>
+    </FormControl>
   );
 };
 

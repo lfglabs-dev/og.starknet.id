@@ -13,7 +13,12 @@ import {
 import Wallets from "./components/wallets";
 import SelectIdentity from "./components/selectIdentity";
 import { TextField } from "@mui/material";
-import { simplifyAddress, useEncoded, useIsValid } from "../utils/utils";
+import {
+  simplifyAddress,
+  useEncoded,
+  useIsValid,
+  hexToDecimal,
+} from "../utils/utils";
 import { useRouter } from "next/router";
 import ModalMessage from "./components/modalMessage";
 
@@ -30,13 +35,14 @@ export default function Home() {
   const [isWrongNetwork, setIsWrongNetwork] = useState<boolean>(false);
   const { library } = useStarknet();
   const { address } = useAccount();
-  const { execute: transfer_domain } = useStarknetExecute({
+  const { execute: register_domain } = useStarknetExecute({
     calls: callData as any,
   });
   const router = useRouter();
   const encodedRootDomain: string = useEncoded(
     process.env.NEXT_PUBLIC_ROOT_DOMAIN ?? ""
   ).toString(10);
+  const [hasMainDomain, setHasMainDomain] = useState<boolean>(false);
   const { disconnect } = useConnectors();
 
   useEffect(() => {
@@ -72,58 +78,170 @@ export default function Home() {
     }
   }, [address, router.query.wallet]);
 
-  function changeSubdomain(value: string): void {
-    setSubdomain(value);
-  }
+  useEffect(() => {
+    if (address) {
+      fetch(
+        `${
+          process.env.NEXT_PUBLIC_APP_LINK
+        }/api/indexer/addr_to_domain?addr=${hexToDecimal(address)}`
+      )
+        .then((response) => response.json())
+        .then((data) => {
+          setHasMainDomain(Boolean(data?.domain));
+        });
+    }
+  }, [address]);
 
   useEffect(() => {
     const newTokenId: number = Math.floor(Math.random() * 1000000000000);
     const signatures = (router.query.signature as string)?.split(",");
 
     if (tokenId != 0) {
-      setCallData([
-        {
-          contractAddress: process.env
-            .NEXT_PUBLIC_DISTRIBUTION_CONTRACT as string,
-          entrypoint: "register",
-          calldata: [
-            2,
-            encodedSubdomain,
-            encodedRootDomain,
-            tokenId,
-            signatures?.[0],
-            signatures?.[1],
-          ],
-        },
-      ]);
+      setCallData(
+        hasMainDomain
+          ? [
+              {
+                contractAddress: process.env
+                  .NEXT_PUBLIC_DISTRIBUTION_CONTRACT as string,
+                entrypoint: "register",
+                calldata: [
+                  2,
+                  encodedSubdomain,
+                  encodedRootDomain,
+                  tokenId,
+                  signatures?.[0],
+                  signatures?.[1],
+                ],
+              },
+              {
+                contractAddress: process.env
+                  .NEXT_PUBLIC_NAMING_CONTRACT as string,
+                entrypoint: "set_domain_to_address",
+                calldata: [
+                  2,
+                  encodedSubdomain,
+                  encodedRootDomain,
+                  hexToDecimal(address ?? ""),
+                ],
+              },
+            ]
+          : [
+              {
+                contractAddress: process.env
+                  .NEXT_PUBLIC_DISTRIBUTION_CONTRACT as string,
+                entrypoint: "register",
+                calldata: [
+                  2,
+                  encodedSubdomain,
+                  encodedRootDomain,
+                  tokenId,
+                  signatures?.[0],
+                  signatures?.[1],
+                ],
+              },
+              {
+                contractAddress: process.env
+                  .NEXT_PUBLIC_NAMING_CONTRACT as string,
+                entrypoint: "set_domain_to_address",
+                calldata: [
+                  2,
+                  encodedSubdomain,
+                  encodedRootDomain,
+                  hexToDecimal(address ?? ""),
+                ],
+              },
+              {
+                contractAddress: process.env
+                  .NEXT_PUBLIC_NAMING_CONTRACT as string,
+                entrypoint: "set_address_to_domain",
+                calldata: [1, encodedSubdomain],
+              },
+            ]
+      );
     } else {
-      setCallData([
-        {
-          contractAddress: process.env
-            .NEXT_PUBLIC_STARKNETID_CONTRACT as string,
-          entrypoint: "mint",
-          calldata: [newTokenId],
-        },
-        {
-          contractAddress: process.env
-            .NEXT_PUBLIC_DISTRIBUTION_CONTRACT as string,
-          entrypoint: "register",
-          calldata: [
-            2,
-            encodedSubdomain,
-            encodedRootDomain,
-            newTokenId,
-            signatures?.[0],
-            signatures?.[1],
-          ],
-        },
-      ]);
+      setCallData(
+        hasMainDomain
+          ? [
+              {
+                contractAddress: process.env
+                  .NEXT_PUBLIC_STARKNETID_CONTRACT as string,
+                entrypoint: "mint",
+                calldata: [newTokenId],
+              },
+              {
+                contractAddress: process.env
+                  .NEXT_PUBLIC_DISTRIBUTION_CONTRACT as string,
+                entrypoint: "register",
+                calldata: [
+                  2,
+                  encodedSubdomain,
+                  encodedRootDomain,
+                  newTokenId,
+                  signatures?.[0],
+                  signatures?.[1],
+                ],
+              },
+              {
+                contractAddress: process.env
+                  .NEXT_PUBLIC_NAMING_CONTRACT as string,
+                entrypoint: "set_domain_to_address",
+                calldata: [
+                  2,
+                  encodedSubdomain,
+                  encodedRootDomain,
+                  hexToDecimal(address ?? ""),
+                ],
+              },
+            ]
+          : [
+              {
+                contractAddress: process.env
+                  .NEXT_PUBLIC_STARKNETID_CONTRACT as string,
+                entrypoint: "mint",
+                calldata: [newTokenId],
+              },
+              {
+                contractAddress: process.env
+                  .NEXT_PUBLIC_DISTRIBUTION_CONTRACT as string,
+                entrypoint: "register",
+                calldata: [
+                  2,
+                  encodedSubdomain,
+                  encodedRootDomain,
+                  newTokenId,
+                  signatures?.[0],
+                  signatures?.[1],
+                ],
+              },
+              {
+                contractAddress: process.env
+                  .NEXT_PUBLIC_NAMING_CONTRACT as string,
+                entrypoint: "set_domain_to_address",
+                calldata: [
+                  2,
+                  encodedSubdomain,
+                  encodedRootDomain,
+                  hexToDecimal(address ?? ""),
+                ],
+              },
+              {
+                contractAddress: process.env
+                  .NEXT_PUBLIC_NAMING_CONTRACT as string,
+                entrypoint: "set_address_to_domain",
+                calldata: [1, encodedSubdomain],
+              },
+            ]
+      );
     }
   }, [tokenId, encodedSubdomain, address, encodedRootDomain, router.query]);
 
   function disconnectByClick(): void {
     disconnect();
     setHasWallet(true);
+  }
+
+  function changeSubdomain(value: string): void {
+    setSubdomain(value);
   }
 
   return (
@@ -169,35 +287,40 @@ export default function Home() {
                 <div className="mb-5">
                   <h1 className={styles.title}>Claim your OG domain</h1>
                 </div>
-                <TextField
-                  fullWidth
-                  id="outlined-basic"
-                  label={
-                    isDomainValid != true
-                      ? `"${isDomainValid}" is not a valid character`
-                      : "Subdomain"
-                  }
-                  placeholder="Subdomain"
-                  variant="outlined"
-                  onChange={(e) => changeSubdomain(e.target.value)}
-                  color="primary"
-                  required
-                  error={isDomainValid != true}
-                />
-                <SelectIdentity
-                  tokenId={tokenId}
-                  changeTokenId={(value) => setTokenId(value)}
-                />
+                <div className="mt-3 mb-3 w-full">
+                  <TextField
+                    fullWidth
+                    id="outlined-basic"
+                    label={
+                      isDomainValid != true
+                        ? `"${isDomainValid}" is not a valid character`
+                        : "OG Subdomain"
+                    }
+                    placeholder="Subdomain"
+                    variant="outlined"
+                    onChange={(e) => changeSubdomain(e.target.value)}
+                    color="primary"
+                    required
+                    error={isDomainValid != true}
+                  />
+                </div>
+                <div className="mt-3 w-full">
+                  <SelectIdentity
+                    tokenId={tokenId}
+                    changeTokenId={(value) => setTokenId(value)}
+                  />
+                </div>
                 <div className="mt-3">
                   <Button
                     disabled={
                       address
                         ? Boolean(!subdomain) ||
-                          typeof isDomainValid === "string"
+                          typeof isDomainValid === "string" ||
+                          Boolean(subdomain && subdomain.length < 4)
                         : false
                     }
                     onClick={() =>
-                      address ? transfer_domain() : setHasWallet(true)
+                      address ? register_domain() : setHasWallet(true)
                     }
                   >
                     {address ? "Mint your subdomain" : "Connect to mainnet"}
