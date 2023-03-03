@@ -6,6 +6,7 @@ import {
   ListItemText,
   MenuItem,
   Select,
+  useMediaQuery,
 } from "@mui/material";
 import { useAccount } from "@starknet-react/core";
 import React, { FunctionComponent, useEffect, useState } from "react";
@@ -24,6 +25,7 @@ const SelectIdentity: FunctionComponent<SelectIdentityProps> = ({
 }) => {
   const { account } = useAccount();
   const [ownedIdentities, setOwnedIdentities] = useState<number[] | []>([]);
+  const isTablet = useMediaQuery("(max-width:1024px)");
 
   useEffect(() => {
     if (account) {
@@ -70,7 +72,17 @@ const SelectIdentity: FunctionComponent<SelectIdentityProps> = ({
               alt="starknet.id avatar"
             />
           </ListItemIcon>
-          <ListItemText primary={defaultText} />
+          <ListItemText
+            sx={{
+              ".css-10hburv-MuiTypography-root": {
+                fontSize: isTablet ? "0.8rem" : "1rem",
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+              },
+            }}
+            primary={defaultText}
+          />
         </MenuItem>
         {ownedIdentities.map((tokenId: number, index: number) => (
           <MenuItem key={index} value={tokenId}>

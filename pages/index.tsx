@@ -12,7 +12,7 @@ import {
 } from "@starknet-react/core";
 import Wallets from "./components/wallets";
 import SelectIdentity from "./components/selectIdentity";
-import { TextField } from "@mui/material";
+import { TextField, useMediaQuery } from "@mui/material";
 import {
   simplifyAddress,
   useEncoded,
@@ -44,6 +44,7 @@ export default function Home() {
   ).toString(10);
   const [hasMainDomain, setHasMainDomain] = useState<boolean>(false);
   const { disconnect } = useConnectors();
+  const isTablet = useMediaQuery("(max-width:1024px)");
 
   useEffect(() => {
     if (hasWallet) return;
@@ -254,11 +255,13 @@ export default function Home() {
       </Head>
       <main className={styles.main}>
         <div className={styles.card}>
-          <img
-            className={styles.identityTokenImage}
-            src="/jungle.jpg"
-            alt="A Jungle image for a VIP domain"
-          />
+          {isTablet ? null : (
+            <img
+              className={styles.identityTokenImage}
+              src="/jungle.jpg"
+              alt="A Jungle image for a VIP domain"
+            />
+          )}
           <div className={styles.textSection}>
             {!router.query.wallet || !router.query.signature ? (
               <>
