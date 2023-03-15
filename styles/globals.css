@@ -85,8 +85,17 @@
 
 @layer base {
   @font-face {
-    font-family: "Montserrat-ExtraBold";
-    src: url(../public/fonts/montserrat/Montserrat-ExtraBold.ttf);
+    font-family: "QuickZap";
+    src: url(../public/fonts/quickzap.ttf);
+  }
+
+  @font-face {
+    font-family: "Poppins-Regular";
+    src: url(../public/fonts/poppins/Poppins-Regular.ttf);
+  }
+  @font-face {
+    font-family: "Poppins-Bold";
+    src: url(../public/fonts/poppins/Poppins-Bold.ttf);
   }
 }
 
@@ -102,8 +111,7 @@ body {
   max-height: 100vh;
   overflow-x: hidden;
   color: var(--background);
-  font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
-    Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
+  font-family: "Poppins-Regular";
 }
 
 a {

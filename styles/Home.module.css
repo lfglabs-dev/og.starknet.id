@@ -20,7 +20,7 @@
 }
 
 .title {
-  font-family: "Montserrat-ExtraBold";
+  font-family: "QuickZap";
   font-size: 1.8rem;
   color: var(--secondary);
   text-transform: uppercase;
@@ -28,7 +28,7 @@
 }
 
 .subtitle {
-  font-family: "Montserrat-ExtraBold";
+  font-family: "QuickZap";
   font-size: 1.4rem;
   max-width: 600px;
   color: var(--secondary);
