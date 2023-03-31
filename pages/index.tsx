@@ -18,6 +18,7 @@ import {
   useEncoded,
   useIsValid,
   hexToDecimal,
+  useAddressFromDomain,
 } from "../utils/utils";
 import { useRouter } from "next/router";
 import ModalMessage from "./components/modalMessage";
@@ -45,6 +46,22 @@ export default function Home() {
   const [hasMainDomain, setHasMainDomain] = useState<boolean>(false);
   const { disconnect } = useConnectors();
   const isTablet = useMediaQuery("(max-width:1024px)");
+  const [isSubdomainTaken, setIsSubdomainTaken] = useState(true);
+  const { address: domainData, error: domainError } = useAddressFromDomain(
+    subdomain + "." + process.env.NEXT_PUBLIC_ROOT_DOMAIN
+  );
+
+  useEffect(() => {
+    if (domainError) {
+      return;
+    } else {
+      if (domainData && subdomain && subdomain.length >= 4) {
+        setIsSubdomainTaken(
+          Boolean((domainData?.["address" as any].toString() as string) === "0")
+        );
+      }
+    }
+  }, [domainData, domainError]);
 
   useEffect(() => {
     if (hasWallet) return;
@@ -55,13 +72,11 @@ export default function Home() {
     };
 
     if (library.chainId === STARKNET_NETWORK.testnet && network === "mainnet") {
-      console.log("wallet testnet et app mainnet");
       setIsWrongNetwork(true);
     } else if (
       library.chainId === STARKNET_NETWORK.mainnet &&
       network === "testnet"
     ) {
-      console.log("wallet mainnet et app testnet");
       setIsWrongNetwork(true);
     } else {
       setIsWrongNetwork(false);
@@ -297,6 +312,10 @@ export default function Home() {
                     label={
                       isDomainValid != true
                         ? `"${isDomainValid}" is not a valid character`
+                        : subdomain && subdomain.length < 4
+                        ? "Less than 4 letters OG domain are not allowed"
+                        : !isSubdomainTaken
+                        ? "OG subdomain is taken"
                         : "OG Subdomain"
                     }
                     placeholder="Subdomain"
@@ -304,7 +323,11 @@ export default function Home() {
                     onChange={(e) => changeSubdomain(e.target.value)}
                     color="primary"
                     required
-                    error={isDomainValid != true}
+                    error={
+                      isDomainValid != true ||
+                      Boolean(subdomain && subdomain.length < 4) ||
+                      !isSubdomainTaken
+                    }
                   />
                 </div>
                 <div className="mt-3 w-full">
@@ -313,13 +336,14 @@ export default function Home() {
                     changeTokenId={(value) => setTokenId(value)}
                   />
                 </div>
-                <div className="mt-3">
+                <div className="mt-3 w-full">
                   <Button
                     disabled={
                       address
                         ? Boolean(!subdomain) ||
                           typeof isDomainValid === "string" ||
-                          Boolean(subdomain && subdomain.length < 4)
+                          Boolean(subdomain && subdomain.length < 4) ||
+                          !isSubdomainTaken
                         : false
                     }
                     onClick={() =>

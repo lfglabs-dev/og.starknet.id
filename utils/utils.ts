@@ -1,4 +1,7 @@
+import { useContract, useStarknetCall } from "@starknet-react/core";
 import BN from "bn.js";
+import { Abi } from "starknet";
+import naming_abi from "../abi/naming_abi.json";
 
 export const basicAlphabet = "abcdefghijklmnopqrstuvwxyz0123456789-";
 export const bigAlphabet = "这来";
@@ -98,4 +101,31 @@ export function simplifyAddress(address: string): string {
   // Add the 0x back
   simplified = "0x" + simplified;
   return simplified.toLowerCase();
+}
+
+type AddressData = {
+  address?: BN[][];
+  error?: string;
+};
+
+export function useAddressFromDomain(domain: string): AddressData {
+  const { contract } = useNamingContract();
+  const encoded = [];
+  for (const subdomain of domain.split("."))
+    encoded.push(useEncoded(subdomain).toString(10));
+
+  const { data, error } = useStarknetCall({
+    contract,
+    method: "domain_to_address",
+    args: [encoded],
+  });
+
+  return { address: data as any, error };
+}
+
+export function useNamingContract() {
+  return useContract({
+    abi: naming_abi as Abi,
+    address: process.env.NEXT_PUBLIC_NAMING_CONTRACT,
+  });
 }
