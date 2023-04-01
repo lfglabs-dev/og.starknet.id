@@ -170,7 +170,7 @@ export default function Home() {
                 contractAddress: process.env
                   .NEXT_PUBLIC_NAMING_CONTRACT as string,
                 entrypoint: "set_address_to_domain",
-                calldata: [1, encodedSubdomain],
+                calldata: [2, encodedSubdomain, encodedRootDomain],
               },
             ]
       );
@@ -244,7 +244,7 @@ export default function Home() {
                 contractAddress: process.env
                   .NEXT_PUBLIC_NAMING_CONTRACT as string,
                 entrypoint: "set_address_to_domain",
-                calldata: [1, encodedSubdomain],
+                calldata: [2, encodedSubdomain, encodedRootDomain],
               },
             ]
       );
