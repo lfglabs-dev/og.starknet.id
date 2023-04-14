@@ -273,7 +273,7 @@ export default function Home() {
           {isTablet ? null : (
             <img
               className={styles.identityTokenImage}
-              src="/jungle.jpg"
+              src="/jungle.webp"
               alt="A Jungle image for a VIP domain"
             />
           )}
