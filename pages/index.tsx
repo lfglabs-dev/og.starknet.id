@@ -50,7 +50,7 @@ export default function Home() {
   const { address: domainData, error: domainError } = useAddressFromDomain(
     subdomain + "." + process.env.NEXT_PUBLIC_ROOT_DOMAIN
   );
-
+  //
   useEffect(() => {
     if (domainError) {
       return;
